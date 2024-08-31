@@ -53,8 +53,4 @@ if uploaded_video is not None:
     
     # Display the processed video in the app
     st.text("Car detection completed. Displaying video below:")
-    video_file = open(processed_video_path, 'rb')
-    video_bytes = video_file.read()
-    st.video(video_bytes)
-    
-    video_file.close()
+    st.video(processed_video_path)
