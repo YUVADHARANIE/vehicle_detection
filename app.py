@@ -9,23 +9,12 @@ def detect_cars_in_video(video_path, cascade_path):
     cap = cv2.VideoCapture(video_path)
     car_cascade = cv2.CascadeClassifier(cascade_path)
     
-    if not cap.isOpened():
-        st.error("Error opening video file.")
-        return None
-    
-    # Get video properties
-    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    
     # Create a temporary file to save the processed video
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
     temp_file_path = temp_file.name
     temp_file.close()
     
-    # Define codec and create VideoWriter object
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(temp_file_path, fourcc, fps, (frame_width, frame_height))
+    video_writer = cv2.VideoWriter(temp_file_path, cv2.VideoWriter_fourcc(*'mp4v'), 20.0, (int(cap.get(3)), int(cap.get(4))))
     
     while cap.isOpened():
         ret, frame = cap.read()
@@ -62,9 +51,10 @@ if uploaded_video is not None:
     cascade_src = 'cars.xml'  # Path to the cars.xml file
     processed_video_path = detect_cars_in_video(tfile_path, cascade_src)
     
-    if processed_video_path:
-        # Display the processed video in the app
-        st.text("Car detection completed. Displaying video below:")
-        st.video(processed_video_path)
-    else:
-        st.error("Failed to process the video.")
+    # Debugging output
+    st.text(f"Processed video path: {processed_video_path}")
+    st.text(f"Video size: {os.path.getsize(processed_video_path)} bytes")
+    
+    # Display the processed video in the app
+    st.text("Car detection completed. Displaying video below:")
+    st.video(processed_video_path)
