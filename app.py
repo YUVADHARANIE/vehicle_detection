@@ -1,11 +1,20 @@
 import cv2
+import tempfile
 import streamlit as st
 import numpy as np
+import os
 
-# Function to detect cars in the video and yield frames
+# Function to detect cars in the video
 def detect_cars_in_video(video_path, cascade_path):
     cap = cv2.VideoCapture(video_path)
     car_cascade = cv2.CascadeClassifier(cascade_path)
+    
+    # Create a temporary file to save the processed video
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+    temp_file_path = temp_file.name
+    temp_file.close()
+    
+    video_writer = cv2.VideoWriter(temp_file_path, cv2.VideoWriter_fourcc(*'mp4v'), 20.0, (int(cap.get(3)), int(cap.get(4))))
     
     while cap.isOpened():
         ret, frame = cap.read()
@@ -18,11 +27,12 @@ def detect_cars_in_video(video_path, cascade_path):
         for (x, y, w, h) in cars:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
         
-        # Convert frame to RGB format for display
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        yield frame_rgb
+        video_writer.write(frame)
     
     cap.release()
+    video_writer.release()
+    
+    return temp_file_path
 
 # Streamlit App Interface
 st.title('Car Detection in Video')
@@ -37,9 +47,20 @@ if uploaded_video is not None:
         tfile.write(uploaded_video.read())
         tfile_path = tfile.name
     
-    # Detect cars in the video and display frames
+    # Detect cars in the video
     cascade_src = 'cars.xml'  # Path to the cars.xml file
-    frames = detect_cars_in_video(tfile_path, cascade_src)
+    processed_video_path = detect_cars_in_video(tfile_path, cascade_src)
     
-    for frame in frames:
-        st.image(frame, caption='Car Detection', use_column_width=True)
+    # Provide a download link for the processed video
+    st.text("Car detection completed. You can download the processed video using the link below:")
+    with open(processed_video_path, "rb") as f:
+        st.download_button(
+            label="Download Processed Video",
+            data=f,
+            file_name="processed_video.mp4",
+            mime="video/mp4"
+        )
+    
+    # Optionally, you can display the video inline for immediate viewing
+    st.text("You can also view the processed video below:")
+    st.video(processed_video_path)
