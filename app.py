@@ -35,7 +35,7 @@ def detect_cars_in_video(video_path, cascade_path):
     return temp_file_path
 
 # Streamlit App Interface
-st.title('Car Detection in Video')
+st.title('Car Detection in Video by yuva')
 
 uploaded_video = st.file_uploader("Upload a video file", type=["mp4", "avi", "mov"])
 
@@ -60,7 +60,3 @@ if uploaded_video is not None:
             file_name="processed_video.mp4",
             mime="video/mp4"
         )
-    
-    # Optionally, you can display the video inline for immediate viewing
-    st.text("You can also view the processed video below:")
-    st.video(processed_video_path)
